@@ -1,0 +1,54 @@
+USE <nome do banco>
+GO
+
+-- O comando abaixo atualiza as informações de uso e fragmentação da tabela (entre outras):
+DBCC UPDATEUSAGE ('<nome do banco>') WITH NO_INFOMSGS
+
+/*
+O DBCC SHOWCONTIG, com os parâmetros abaixo, retornará um result set, contendo o nome das tabelas (ObjectName), 
+nome do(s) índice(s) (IndexName) e a densidade (ScanDensity).
+Deve-se fazer o reindex quando a densidade for menor que 90%.
+*/
+DBCC SHOWCONTIG () WITH FAST, TABLERESULTS, ALL_INDEXES, NO_INFOMSGS
+
+
+-------------------------------
+
+
+REINDEX , UPDATE STATS  !!!!!
+
+Method 1: My Preference
+
+USE MyDatabase
+GO
+EXEC sp_MSforeachtable @command1="print '?' DBCC DBREINDEX ('?', ' ', 80)"
+GO
+EXEC sp_updatestats
+GO 
+
+Method 2:
+
+USE MyDatabase
+GO
+CREATE PROCEDURE spUtil_ReIndexDatabase_UpdateStats
+AS
+DECLARE @MyTable VARCHAR(255)
+DECLARE myCursor
+CURSOR FOR
+SELECT table_name
+FROM information_schema.tables
+WHERE table_type = 'base table'
+OPEN myCursor
+FETCH NEXT
+FROM myCursor INTO @MyTable
+WHILE @@FETCH_STATUS = 0
+BEGIN
+PRINT 'Reindexing Table:  ' + @MyTable
+DBCC DBREINDEX(@MyTable, '', 80)
+FETCH NEXT
+FROM myCursor INTO @MyTable
+END
+CLOSE myCursor
+DEALLOCATE myCursor
+EXEC sp_updatestats
+GO

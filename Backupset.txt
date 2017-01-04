@@ -1,0 +1,44 @@
+select backup_finish_date, backup_start_date, database_name, TYPE  from backupset 
+where TYPE = 'D' and backup_start_date >= '2010-04-20 23:30:00'
+
+
+
+select @@servername
+go
+select top 1 database_name,backup_start_date, backup_finish_date, type from msdb..backupset
+where type = 'D' and database_name = 'OPVD'
+order by backup_start_date desc
+
+
+----------------
+Varios bancos
+---------------
+select @@servername as Server
+go
+select top 4 database_name,backup_start_date, backup_finish_date, type from msdb..backupset
+where type = 'D' and database_name  in  ('OPVD','OPVD_HIST','OPVD_WK','OPTEMP') 
+--and backup_start_date >= '2011-10-03'
+order by backup_start_date desc
+go
+
+
+=================================================
+select @@servername as Server
+go
+select top 9 	database_name,
+		backup_start_date, 
+		backup_finish_date, 
+		type,  
+		tempo_duracao = 	  Convert(VarChar(10), DATEDIFF(MI, backup_start_date, backup_finish_date) / 60) + ':' + 
+                Right(Replicate('0', 2) + Convert(VarChar(10), DATEDIFF(MI, backup_start_date, backup_finish_date) % 60), 2)+':'+
+		Right(Replicate('0', 2) + Convert(VarChar(10), DATEDIFF(SS, backup_start_date, backup_finish_date) % 60), 2)
+		
+from msdb..backupset
+where type = 'D'
+and backup_start_date >= '2011-10-03'
+order by backup_start_date desc
+go
+
+
+ 
+======================================================

@@ -1,0 +1,31 @@
+---------------------------------------
+-------INDEX SIZE ---------------------
+-------Rafael Dontal Goncalez ---------
+-------20-08-2013----------------------
+---------------------------------------
+
+SELECT i.[name] AS IndexName
+      , object_name(i.object_id) as table_name
+      ,SUM(s.[used_page_count]) * 8 AS IndexSizeKB 
+FROM sys.dm_db_partition_stats AS s 
+JOIN sys.indexes AS i 
+ON s.[object_id] = i.[object_id] 
+AND s.[index_id] = i.[index_id] 
+--where i.is_primary_key = 0
+GROUP BY i.[name], i.object_id
+ORDER BY IndexSizeKB desc
+GO
+
+------------------------
+--ou ---------------------
+------------------------
+SELECT
+OBJECT_NAME(i.OBJECT_ID) AS TableName,
+i.name AS IndexName,
+i.index_id AS IndexID,
+8 * SUM(a.used_pages) AS 'Indexsize(KB)'
+FROM sys.indexes AS i
+JOIN sys.partitions AS p ON p.OBJECT_ID = i.OBJECT_ID AND p.index_id = i.index_id
+JOIN sys.allocation_units AS a ON a.container_id = p.partition_id
+GROUP BY i.OBJECT_ID,i.index_id,i.name
+ORDER BY OBJECT_NAME(i.OBJECT_ID),i.index_id

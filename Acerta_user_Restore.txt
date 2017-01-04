@@ -1,0 +1,3 @@
+select 'sp_change_users_login '+ ''''+'UPDATE_ONE'+''''+','+ ''''+ name + ''''+','+ ''''+name+'''' + char(13) + ' go'
+from sysusers
+where issqluser = 1

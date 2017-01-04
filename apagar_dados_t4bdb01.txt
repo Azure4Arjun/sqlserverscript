@@ -1,0 +1,19 @@
+declare @oi int
+set @oi = 100
+set rowcount 5000
+while @oi > 0
+begin
+delete from t4btb_cmdexec
+where Timestamp < '2011-01-01'
+set @oi = @oi - 1
+print @oi
+end
+
+
+
+set rowcount 1000
+while (select count(8) from t4btb_cmdexec where Timestamp < '2011-01-01') > 0
+begin
+delete from t4btb_cmdexec
+where Timestamp < '2011-01-01'
+end

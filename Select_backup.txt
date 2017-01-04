@@ -1,0 +1,9 @@
+USE MSDB
+
+SELECT @@SERVERNAME
+
+SELECT server_name , database_name , backup_start_date , backup_finish_date , type 
+FROM 	BACKUPSET 
+WHERE 	TYPE = 'D'
+AND	backup_finish_date >= '2010-02-23'
+AND	DATABASE_NAME = 'OPVD'

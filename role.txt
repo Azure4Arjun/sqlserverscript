@@ -1,0 +1,8 @@
+select top 1 @nomebd = substring(name,1,30) from #tmp_bd
+                                select @comando = 'insert #tmp_usuario select "'+ @@servername +'", "['+ @nomebd +']", substring(g.name,1,30), substring(u.name,1,30)
+                                from ['+ @nomebd +']..sysusers u, ['+ @nomebd +']..sysusers g, ['+ @nomebd +']..sysmembers m
+                                where   g.uid = m.groupuid
+                                and        u.uid = m.memberuid
+                                and        g.issqlrole = 1
+                                and        u.status <> 0
+                                order by g.name'

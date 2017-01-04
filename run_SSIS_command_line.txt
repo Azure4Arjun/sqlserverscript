@@ -1,0 +1,1 @@
+dtexec /ISSERVER "\"\SSISDB\downgraded_vehicles\downgraded_vehicles\downgraded_pkg.dtsx\"" /SERVER "\"SQLFCIU4\SQLU4\"" /Par "\"$ServerOption::LOGGING_LEVEL(Int16)\"";3 /Par "\"$ServerOption::DUMP_ON_ERROR(Boolean)\"";True /Par "\"$ServerOption::SYNCHRONIZED(Boolean)\"";True /CALLERINFO SQLAGENT /REPORTING E

@@ -1,0 +1,7 @@
+DECLARE @JobName varchar(max)
+DECLARE @job_name varchar (max)
+SELECT @JobName = [name] 
+FROM msdb.dbo.sysjobs WHERE job_id = cast(0xE8E5F8C051DD474AAF74FDD5D91632C2 AS uniqueidentifier)
+select @JobName as JobName
+EXECUTE msdb..sp_help_job @job_name = @JobName
+EXECUTE msdb..sp_help_jobstep @job_name = @JobName

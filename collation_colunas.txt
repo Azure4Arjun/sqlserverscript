@@ -1,0 +1,46 @@
+sp_msforeachdb 'use [?] SET NOCOUNT ON 
+    IF (db_name() not in (''master'',''msdb'',''tempdb'',''model'',''t4bdb01'',''ReportServer'',''ReportServerTempDB'')) 
+    BEGIN
+    select db_name() as dbname, 
+    object_name(object_id) as table_name, 
+    name as column_name, 
+    SERVERPROPERTY (''COLLATION'') as instance_collation,
+    database_colletion = (SELECT DATABASEPROPERTYEX (db_name(),''COLLATION'')),
+    collation_name AS column_collation
+    from sys.columns where collation_name <> ''NULL'' 
+    END' 			
+					
+						
+--
+
+sp_msforeachdb 'use [?] IF EXISTS(select * from sys.columns where collation_name <> NULL)
+							BEGIN 
+								select db_name() as dbname select object_name(object_id) as object_name, name as column_name, collation_name from sys.columns where collation_name <> NULL 
+							END 
+						ELSE
+							BEGIN 
+								select ''nao ha collationa atribuido para coluna no banco de dados '' + DB_NAME()
+							END'
+
+--OU
+
+sp_msforeachdb 'USE [?] DECLARE @DatabaseCollation VARCHAR(100)
+select db_name() as database_name
+
+SELECT 
+    t.Name as table_name,
+    c.name as column_name,
+    ty.name as type_name,
+    c.max_length,
+    c.collation_name,
+    c.is_nullable
+FROM 
+    sys.columns c 
+INNER JOIN 
+    sys.tables t ON c.object_id = t.object_id
+INNER JOIN 
+    sys.types ty ON c.system_type_id = ty.system_type_id    
+WHERE 
+    t.is_ms_shipped = 0
+    AND 
+    c.collation_name <> ''NULL'''

@@ -1,0 +1,14 @@
+[14/08/2013 16:46:49] Fernando Henrique Cavalcanti Nunes: tem alguns white papers, mas no geral tem que instalar a feature de cluster no windows e posteriormente no sql server
+[14/08/2013 16:47:29] Fernando Henrique Cavalcanti Nunes: tem algumas premissas para isso tudo
+[14/08/2013 16:47:56] Fernando Henrique Cavalcanti Nunes: 2 servidores + AD  + Storage
+[14/08/2013 16:48:17] Fernando Henrique Cavalcanti Nunes: caso nao tenha AD vai precisar de mais um servidore
+[14/08/2013 16:48:23] Fernando Henrique Cavalcanti Nunes: *servidor
+[14/08/2013 16:49:01] *** Fernando Henrique Cavalcanti Nunes enviado WS08 R2 Failover Clustering White Paper.doc ***
+[14/08/2013 16:49:15] Fernando Henrique Cavalcanti Nunes: no minimo 2 discos compartilhados
+[14/08/2013 16:49:28] Fernando Henrique Cavalcanti Nunes: 2 placas de rede em cada servidor
+[14/08/2013 16:49:43] Fernando Henrique Cavalcanti Nunes: hardware indentico (desejável)
+[14/08/2013 16:50:02] Fernando Henrique Cavalcanti Nunes: disco local em raid 1 (ideal)
+[14/08/2013 16:51:22] Fernando Henrique Cavalcanti Nunes: algumas permissões especificas no AD (domain admin é o ideal)
+[14/08/2013 16:51:38] Fernando Henrique Cavalcanti Nunes: é um cluster com qual versão do sql?
+[14/08/2013 16:54:03] Fernando Henrique Cavalcanti Nunes: tem alguns outros requisitos, mas dependendo da versão do windows ele já conta com isso
+[14/08/2013 16:54:21] Fernando Henrique Cavalcanti Nunes: dá uma olhada neste link: http://technet.microsoft.com/en-us/library/ms189910.aspx

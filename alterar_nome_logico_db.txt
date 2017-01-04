@@ -1,0 +1,1 @@
+ALTER DATABASE <Database name>  MODIFY FILE  ( NAME = <current_logical_name>, NEWNAME = <new_logical_name>)

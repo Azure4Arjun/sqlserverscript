@@ -1,0 +1,13 @@
+
+
+sqlservr -s<nome da instancia_caso haja uma nomeada> -m -T4022 -T3659 -q"novo collation"
+
+
+Exemplo:
+
+sqlservr -sSED_DESVAR -m -T4022 -T3659 -q"SQL_Latin1_General_CP1_CI_AS"
+
+
+
+Link com explicação
+http://www.mcdbabrasil.com.br/modules.php?name=News&file=article&sid=244

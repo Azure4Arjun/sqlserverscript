@@ -1,0 +1,6 @@
+Para o SQLTRACE_BUFFER_FLUSH Tenta desativar o trace default 
+
+exec sp_configure 'show advanced options',1 
+reconfigure 
+exec sp_configure 'default trace enabled',0 
+reconfigure

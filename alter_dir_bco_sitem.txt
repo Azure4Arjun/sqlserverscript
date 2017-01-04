@@ -1,0 +1,3 @@
+Mudar Banco de dados locais: http://msdn.microsoft.com/pt-br/library/ms345483.aspx
+ 
+Mudar Banco de dados de sistema: http://msdn.microsoft.com/pt-br/library/ms345408.aspx

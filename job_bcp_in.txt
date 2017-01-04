@@ -1,0 +1,27 @@
+Dim Diretorio
+Dim File
+Dim objFile 
+Dim oShell
+
+
+Set objFile = CreateObject("Scripting.FileSystemObject")
+Set Diretorio = objFile.GetFolder("C:\t4b\")
+Set oShell = WScript.CreateObject ("WScript.Shell")
+
+
+For Each objFile In Diretorio.Files
+	
+	If (Mid(objFile.Name, 17,3) = "FWS") Then
+		'Wscript.Echo objFile.Name
+		oShell.run "bcp ControleInternet.dbo.tbl_LogFWS in C:\t4b\" & objFile.Name & " -SAMBRSAOSQL1 -T -c -F2"
+		'objFile.Delete True
+
+	End If
+
+	If (Mid (objFile.Name, 17,3)  = "WEB") Then
+		'Wscript.Echo objFile.Name
+		oShell.run "bcp ControleInternet.dbo.tbl_LogWeb in C:\t4b\" & objFile.Name & " -SAMBRSAOSQL1 -T -c -F2"
+		'objFile.Delete True
+		
+	End If
+next

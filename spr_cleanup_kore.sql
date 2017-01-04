@@ -1,0 +1,1 @@
+exec spr_cleanup_kore

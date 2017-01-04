@@ -1,0 +1,3 @@
+Backup individual nossa rotina
+
+sp_t4b_procadm 'BACKUP_IND', 't4bdb01'

@@ -1,0 +1,9 @@
+Pessoal,
+
+Isso pode ajudar em chamados referentes a falha de login.
+
+A maioria das falhas de login no SQL gera o erro 18456. Junto do código do erro é reportado também o state do erro. De acordo com esse state podemos identificar se é um login inválido, senha incorreta, etc.
+
+Informações nos links abaixo.
+http://msdn.microsoft.com/en-us/library/cc645917.aspx
+http://sql-articles.com/articles/troubleshooting/troubleshooting-login-failed-error-18456/

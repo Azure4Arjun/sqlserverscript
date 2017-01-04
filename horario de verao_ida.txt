@@ -1,0 +1,6 @@
+select @@servername
+go
+select getdate()
+go
+sp_MSforeachdb '
+select databasepropertyex(''?'',''STATUS'') ?'

@@ -1,0 +1,69 @@
+DECLARE @cip varchar(510)
+DECLARE @csusername varchar(510)
+DECLARE @csreferred varchar (8000)
+DECLARE @csuri varchar(8000)
+DECLARE @FilterInf varchar(510)
+DECLARE @GMT_Time varchar(510)
+DECLARE @UrlDestHost varchar(510)
+DECLARE @sport varchar(510)
+DECLARE @count int
+
+DECLARE CUR_DELETE CURSOR FOR
+select [c-ip],
+[cs-username],
+[cs-referred],
+[cs-uri],
+FilterInfo,
+[GMT_Time], 
+UrlDestHost, 
+[s-port], count(*) from tbl_LogWeb
+group by  [c-ip],
+[cs-username],
+[cs-referred],
+[cs-uri],
+FilterInfo,
+[GMT_Time], 
+UrlDestHost, 
+[s-port]
+having COUNT(*) > 1
+
+OPEN CUR_DELETE
+
+FETCH NEXT FROM CUR_DELETE INTO @cip,
+@csusername,
+@csreferred,
+@csuri,
+@FilterInf,
+@GMT_Time,
+@UrlDestHost,
+@sport,
+@count
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+DELETE TOP(@count - 1) FROM [tbl_LogWeb] WHERE [c-ip]=	@cip and
+[cs-username] =	@csusername and
+[cs-referred]=	@csreferred and
+[cs-uri]=	@csuri and
+FilterInfo=	@FilterInf and
+[GMT_Time]= 	@GMT_Time and
+UrlDestHost= 	@UrlDestHost and
+[s-port]=	@sport
+
+
+
+
+FETCH NEXT FROM CUR_DELETE INTO @cip,
+@csusername,
+@csreferred,
+@csuri,
+@FilterInf,
+@GMT_Time,
+@UrlDestHost,
+@sport,
+@count
+
+END
+
+CLOSE CUR_DELETE
+DEALLOCATE CUR_DELETE

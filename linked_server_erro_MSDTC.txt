@@ -1,0 +1,4 @@
+USE [master]
+GO
+EXEC master.dbo.sp_serveroption @server=N'<lnk_servername>', @optname=N'remote proc transaction promotion', @optvalue=N'false'
+GO

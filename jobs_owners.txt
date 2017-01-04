@@ -1,0 +1,4 @@
+select a.name as Job, b.name as Owner   from msdb..sysjobs a
+inner join syslogins b on a.owner_sid = b.sid
+where a.name not like ('%T4B%') and a.name not in ('t4bjb_Monit_cmdexec','syspolicy_purge_history')
+order by a.name

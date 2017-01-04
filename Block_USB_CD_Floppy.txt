@@ -1,0 +1,71 @@
+MÁQUINA DE CLASSE
+CATEGORIA!!categoria
+CATEGORIA!!NomeDaCategoria
+DIRETIVA!!policynameusb
+KEYNAME "SYSTEM\CurrentControlSet\Services\USBSTOR"
+EXPLIQUE!!explaintextusb
+PARTE!!labeltextusb necessário DROPDOWNLIST
+ 
+VALUENAME "Iniciar"
+ITEMLIST
+NOME!!PADRÃO desativado valor NUMÉRICO 3
+NOME!!Habilitado valor NUMÉRICO 4
+END ITEMLIST
+PARTE FINAL
+POLÍTICA DE FIM
+DIRETIVA!!policynamecd
+KEYNAME "SYSTEM\CurrentControlSet\Services\Cdrom."
+EXPLIQUE!!explaintextcd
+PARTE!!labeltextcd necessário DROPDOWNLIST
+ 
+VALUENAME "Iniciar"
+ITEMLIST
+NOME!!PADRÃO desativado valor NUMÉRICO 1
+NOME!!Habilitado valor NUMÉRICO 4
+END ITEMLIST
+PARTE FINAL
+POLÍTICA DE FIM
+DIRETIVA!!policynameflpy
+KEYNAME "SYSTEM\CurrentControlSet\Services\Flpydisk"
+EXPLIQUE!!explaintextflpy
+PARTE!!labeltextflpy necessário DROPDOWNLIST
+ 
+VALUENAME "Iniciar"
+ITEMLIST
+NOME!!PADRÃO desativado valor NUMÉRICO 3
+NOME!!Habilitado valor NUMÉRICO 4
+END ITEMLIST
+PARTE FINAL
+POLÍTICA DE FIM
+DIRETIVA!!policynamels120
+KEYNAME "SYSTEM\CurrentControlSet\Services\Sfloppy"
+EXPLIQUE!!explaintextls120
+PARTE!!labeltextls120 DROPDOWNLIST necessária
+ 
+VALUENAME "Iniciar"
+ITEMLIST
+NOME!!PADRÃO desativado valor NUMÉRICO 3
+NOME!!Habilitado valor NUMÉRICO 4
+END ITEMLIST
+PARTE FINAL
+POLÍTICA DE FIM
+CATEGORIA FINAL
+CATEGORIA FINAL
+ 
+[strings]
+categoria = "Configurações de diretiva personalizada"
+NomeDaCategoria = "Restringir unidades"
+policynameusb = "Desativar USB"
+policynamecd = "Desativar o CD-ROM"
+policynameflpy = "Desativar Floppy"
+policynamels120 = "Desativar disquete capacidade alta"
+explaintextusb = "Desativa os computadores portas USB, desativando o driver Usbstor. sys"
+explaintextcd = "Desativa os unidade de CD-ROM de computadores, desativando o driver de CDROM"
+explaintextflpy = "Desativa os unidade de disquete de computadores, desativando o driver flpydisk.sys"
+explaintextls120 = "Desativa os computadores alta capacidade unidade disquete, desativando o driver sfloppy.sys"
+labeltextusb = "Desativar as portas USB"
+labeltextcd = "Desativar a unidade de CD-ROM"
+labeltextflpy = "Desativar disquete unidade"
+labeltextls120 = "Desativar a unidade de disquete de alta capacidade"
+Ativado = "Ativado"
+Disabled = "Desativado"

@@ -1,0 +1,11 @@
+sp_help ponto
+
+select * from sys.sysobjects where uid = 5
+order by name
+
+select 'drop table ' + char(39) + name +  char(39) + name
+
+from sys.sysobjects where uid = 5 order by name
+
+ 
+ 

@@ -1,0 +1,7 @@
+Favor nos informar os seguintes pontos:
+- Nome do servidor em que devemos configurar o database mail;
+- Nome do database mail;
+- Endereço de email de envio;
+- Nome que será exibido ao destinatário;
+- Endereço de email para resposta;
+- Servidor SMTP , porta;

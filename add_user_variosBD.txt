@@ -1,0 +1,7 @@
+sp_MSforeachdb '?..sp_adduser ''SOFISANT\hrodrigues'',''hrodrigues'''
+
+sp_MSforeachdb '?..sp_changeuserlogin'
+
+sp_MSforeachdb '?..sp_addrolemember ''db_datareader'',''hrodrigues'''
+
+sp_MSforeachdb 'sp_helpuser ''hrodrigues'''

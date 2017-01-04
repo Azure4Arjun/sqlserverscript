@@ -1,0 +1,4 @@
+select databasepropertyex('nome_do_banco','STATUS')
+
+select * from sysaltfiles
+where db_name(dbid) = 'nome_do_banco'

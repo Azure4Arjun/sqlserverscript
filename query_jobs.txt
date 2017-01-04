@@ -1,0 +1,16 @@
+select @@SERVERNAME
+go
+select name, description, date_created, date_modified, enabled from msdb..sysjobs
+where name not like 'T4B%'
+go
+--proximas execuções_jobs/nomes
+use msdb
+go
+SELECT sysjobschedules.next_run_date, sysjobschedules.next_run_time, sysjobs.name
+FROM sysjobschedules
+INNER JOIN sysjobs
+ON sysjobschedules.job_id=sysjobs.job_id
+where sysjobschedules.next_run_date >= 20111123
+and sysjobs.enabled = 1
+ORDER BY sysjobschedules.next_run_date
+go

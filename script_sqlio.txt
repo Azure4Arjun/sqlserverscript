@@ -1,0 +1,20 @@
+Para Leitura
+sqlio -kR -s120 -frandom -o8 -b8
+
+sqlio -kR -s120 -frandom -o8 -b64
+
+sqlio -kR -s120 -fsequencial -o8 -b64
+
+Para Escrita
+
+sqlio -kW -s120 -frandom -o8 -b8
+
+sqlio -kW -s120 -frandom -o8 -b64
+
+sqlio -kW -s120 -fsequencial -o8 -b64
+
+
+sqlio -kW -s10  -t64 -o128 -fsequencial -b64 -BH
+sqlio -kW -s10  -t64 -o128 -fsequential -b64 -BH
+
+sqlio -kW -s120  -t64 -o128 -frandom -b64 -LS D:\SQLIO\testfile.dat

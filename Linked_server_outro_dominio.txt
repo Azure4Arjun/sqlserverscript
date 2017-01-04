@@ -1,0 +1,8 @@
+EXEC sp_addlinkedserver   
+   @server=N'AMBRSAOSQL2\SQL2', 
+   @srvproduct=N'',
+   @provider=N'SQLNCLI', 
+   @datasrc=N'AMBRSAOSQL2.latam.ipsos\SQL2';
+   
+   
+   EXEC master.dbo.sp_addlinkedsrvlogin @rmtsrvname=N'AMBRSAOSQL2\SQL2',@useself=N'False',@locallogin=NULL,@rmtuser=N'ipsosbrasil',@rmtpassword='08ABA0AB5974-FF5A-D364-181D-EC880B4B'

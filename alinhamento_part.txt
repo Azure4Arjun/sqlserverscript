@@ -1,0 +1,11 @@
+create partition primary align=1024
+
+
+checar:
+
+1) Rodar no drive antigo de 4KB e no novo de 64KB
+
+fsutil fsinfo ntfsinfo <ANTIGO>:
+fsutil fsinfo ntfsinfo <NOVO>:
+
+wmic partition get BlockSize, StartingOffset, Name, Index

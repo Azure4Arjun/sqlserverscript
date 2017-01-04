@@ -1,0 +1,9 @@
+
+----- Quantos bancos q nao sao do sistema ------
+
+
+select count(*) as contador from sysdatabases
+Where lower(name) not in
+('master','tempdb','model','msdb','t4bdb01',
+'pubs','northwind','adventureworks',
+'adventureworksdw')

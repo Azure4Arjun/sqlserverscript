@@ -1,0 +1,5 @@
+sp_addlinkedserver @server= N'BRHTLALPAAPLD01_SQL2005',
+			@srvproduct= N'',
+			@provider='SQLNCLI', 
+			@datasrc= N'BRHTLALPAAPLD01\SQL2005'
+			

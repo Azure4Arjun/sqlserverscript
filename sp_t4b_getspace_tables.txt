@@ -1,0 +1,118 @@
+DECLARE @stmt nvarchar(1000)
+
+CREATE TABLE #showfilestats_final (
+	Banco	nvarchar(128),
+	Total	DECIMAL(15,2),
+	Utilizado DECIMAL(15,2),
+	Livre	DECIMAL(15,2)
+)
+CREATE TABLE #showlogstats (
+	Banco	nvarchar(128),
+	TotalLog DECIMAL(15,2),
+	Utilizado DECIMAL(15,2),
+	Status INT
+)
+
+EXEC sp_MSforeachdb @command1 = '
+USE [?]
+SET NOCOUNT ON
+
+CREATE TABLE #showfilestats (
+	Fileid	INT,
+	FileGroup INT,
+	TotalExtents DECIMAL(15),
+	UsedExtents DECIMAL(15),
+	Name VARCHAR(255),
+	FileName VARCHAR(255))
+
+INSERT INTO #showfilestats
+EXEC (''DBCC SHOWFILESTATS WITH NO_INFOMSGS'')
+
+INSERT INTO #showfilestats_final
+SELECT	''?'',
+	Total = TotalExtents*65536/1024/1024,
+	Utilizado = UsedExtents*65536/1024/1024,
+	Livre = TotalExtents*65536/1024/1024 - UsedExtents*65536/1024/1024
+FROM	#showfilestats
+
+DROP TABLE #showfilestats'
+
+INSERT INTO #showlogstats
+EXEC ('DBCC SQLPERF(LOGSPACE)')
+
+IF NOT REPLACE(@@VERSION, '  ', ' ') LIKE 'Microsoft SQL Server 7%'
+BEGIN
+	SELECT @stmt = 'SELECT	SERVIDOR = CONVERT(VARCHAR,@@SERVERNAME),
+			INSTANCIA = CONVERT(VARCHAR,ISNULL(SERVERPROPERTY(''InstanceName''), @@SERVERNAME)),
+			BANCO = CONVERT(VARCHAR,A.Banco),
+			TAMANHO_BANCO_MB = A.Total,
+			LIVRE_BANCO_MB = A.Livre,
+			PERC_OCUP = 100 - CONVERT(DECIMAL(5,2),A.Livre * 100.0 / Total),
+			TAMANHO_LOG_MB = B.TotalLog,
+			LOG_SPACE_USED = B.Utilizado,
+			DATA = GETDATE()
+		FROM	#showfilestats_final A
+			inner join #showlogstats B on A.Banco = B.Banco
+		WHERE	A.Banco != ''model'' '
+END
+ELSE
+BEGIN
+	SELECT @stmt = 'SELECT	SERVIDOR = CONVERT(VARCHAR,@@SERVERNAME),
+			INSTANCIA = CONVERT(VARCHAR,@@SERVERNAME),
+			BANCO = CONVERT(VARCHAR,A.Banco),
+			TAMANHO_BANCO_MB = A.Total,
+			LIVRE_BANCO_MB = A.Livre,
+			PERC_OCUP = 100 - CONVERT(DECIMAL(5,2),A.Livre * 100.0 / Total),
+			TAMANHO_LOG_MB = B.TotalLog,
+			LOG_SPACE_USED = B.Utilizado,
+			DATA = GETDATE()
+		FROM	#showfilestats_final A
+			inner join #showlogstats B on A.Banco = B.Banco
+		WHERE	A.Banco != ''model'' '
+END
+/*
+IF @dbname IS NOT NULL
+BEGIN
+	SELECT @stmt = @stmt + '
+	AND A.Banco like ''' + @dbname + ''' '
+END
+
+IF NOT @threshold IS NULL
+BEGIN
+	SELECT @stmt = @stmt + '
+			AND 100 - CONVERT(DECIMAL(5,2),A.Livre * 100.0 / Total) >= ' + CONVERT(VARCHAR, @threshold)
+END
+
+SELECT @stmt = @stmt + '
+		ORDER BY 1,2,3'
+		
+set nocount off*/
+
+--select @stmt
+--EXEC(@stmt)
+
+CREATE TABLE #fim_fim(
+	INSTANCIA VARCHAR(255),
+	BANCO VARCHAR(255),
+	Tamanho_db	DECIMAL(15,2),
+	Livre_bd	DECIMAL(15,2),
+	Tamanho_log DECIMAL(15,2),
+	Livre_log DECIMAL(15,2))
+INSERT INTO #fim_fim 
+SELECT INSTANCIA = CONVERT(VARCHAR,ISNULL(SERVERPROPERTY('InstanceName'), @@SERVERNAME)),     
+BANCO = CONVERT(VARCHAR,A.Banco),     
+TAMANHO_BANCO_MB = A.Total,     
+LIVRE_BANCO_MB = A.Livre,     
+TAMANHO_LOG_MB = B.TotalLog,     
+LOG_SPACE_USED = B.Utilizado FROM #showfilestats_final A     
+inner join #showlogstats B 
+on A.Banco = B.Banco   
+WHERE A.Banco != 'model'
+
+SELECT * FROM #fim_fim
+GROUP BY BANCO
+
+DROP TABLE #fim_fim
+
+--DROP TABLE #showfilestats_final
+--DROP TABLE #showlogstats

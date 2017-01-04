@@ -1,0 +1,24 @@
+echo ***INICIO*** > c:\t4b\farol\farol_backup_danone.out
+date/t >> c:\t4b\farol\farol_backup_danone.out
+time/t >> c:\t4b\farol\farol_backup_danone.out
+osql -Ut4b_farol -Pt4b_farol -n -i c:\t4b\farol\farol_backup_danone.sql -S172.16.30.1 1>>c:\t4b\farol\farol_backup_danone.out -w256
+
+osql -Ut4b_farol -Pt4b_farol -n -i c:\t4b\farol\farol_backup_danone.sql -S10.8.31.21 1>>c:\t4b\farol\farol_backup_danone.out -w256
+
+osql -Ut4b_farol -Pt4b_farol -n -i c:\t4b\farol\farol_backup_danone.sql -S10.8.1.42 1>>c:\t4b\farol\farol_backup_danone.out -w256
+
+osql -Ut4b_farol -Pt4b_farol -n -i c:\t4b\farol\farol_backup_danone.sql -S10.8.1.6  1>>c:\t4b\farol\farol_backup_danone.out -w256
+
+osql -Ut4b_farol -Pt4b_farol -n -i c:\t4b\farol\farol_backup_danone.sql -S10.8.1.36 1>>c:\t4b\farol\farol_backup_danone.out -w256
+
+osql -Ut4b_farol -Pt4b_farol -n -i c:\t4b\farol\farol_backup_danone.sql -S10.8.31.24 1>>c:\t4b\farol\farol_backup_danone.out -w256
+
+osql -Ut4b_farol -Pt4b_farol -n -i c:\t4b\farol\farol_backup_danone.sql -S10.8.8.4   1>>c:\t4b\farol\farol_backup_danone.out -w256
+
+osql -Ut4b_farol -Pt4b_farol -n -i c:\t4b\farol\farol_backup_danone.sql -S10.8.1.72   1>>c:\t4b\farol\farol_backup_danone.out -w256
+
+osql -Ut4b_farol -Pt4b_farol -n -i c:\t4b\farol\farol_backup_danone.sql -S10.8.1.30  1>>c:\t4b\farol\farol_backup_danone.out -w256
+
+date/t >> c:\t4b\farol\farol_backup_danone.out
+time/t >> c:\t4b\farol\farol_backup_danone.out
+echo ***FIM*** >> c:\t4b\farol\farol_backup_danone.out

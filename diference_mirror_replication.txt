@@ -1,0 +1,48 @@
+Mirroring :-    
+
+1)The Mirroring is database Level.
+
+
+2) The Mirror database is not accessible for read or write access.
+
+3)Information flow will be only one way (from Principal to Mirror Server)
+
+4) In case of failure of the Principal Database, the Mirror Database will take over the control and will act as
+
+Principal and applications can be redirected automatically to connect to this new Principal Server. Very little downtime. No
+
+code change required in the application.
+
+5)In Short, Mirroring is a good tool for DR (Disaster Recovery) with very little downtime, but the drawback is that the DR site will not be accessible to users.
+
+6) The mirroring supports  automatic fail over.
+
+ 
+
+Replication:-
+
+1)Relication is object level and two way update data
+  
+2)The Subscriber Database (backup site) is open to reads and writes.
+
+3)Changes can be merged, bi-directional changes can be made, so the information can flow from Publisher to
+
+Subscriber and the other way around..
+
+4) In case of failure on Publisher, applications need to be re-directed to the Subscriber manually (in case you
+
+really want to do that), requires code change in the app or the connection string.
+
+
+5)whereas Replication can be used to Merge Data between two Servers, can act as a good tool
+
+for Reporting purposes as the backup site is accessible to the users, can also act a DR solution.
+
+6) Replication doesn't support Automatic failover.
+
+ 
+
+
+It all depends on what you need, what are the business requirements , which will help you to choose the right topology in
+
+your environment.

@@ -1,0 +1,64 @@
+
+--http://www.mssqltips.com/sqlservertip/2350/creating-io-performance-snapshots-to-find-sql-server-performance-problems/
+SELECT  DB_NAME(fs.database_id) AS [Database Name] ,
+        mf.physical_name ,
+        size_kb = (fs.size_on_disk_bytes/1024),
+        io_stall_read_ms ,
+        num_of_reads ,
+        CAST(io_stall_read_ms / ( 1.0 + num_of_reads ) AS NUMERIC(10, 1)) AS [avg_read_stall_ms] ,
+        io_stall_write_ms ,
+        num_of_writes ,
+        CAST(io_stall_write_ms / ( 1.0 + num_of_writes ) AS NUMERIC(10, 1)) AS [avg_write_stall_ms] ,
+        io_stall_read_ms + io_stall_write_ms AS [io_stalls] ,
+        num_of_reads + num_of_writes AS [total_io] ,
+        CAST(( io_stall_read_ms + io_stall_write_ms ) / ( 1.0 + num_of_reads
+                                                          + num_of_writes ) AS NUMERIC(10,
+                                                              1)) AS [avg_io_stall_ms]
+FROM    sys.dm_io_virtual_file_stats(NULL, NULL) AS fs
+        INNER JOIN sys.master_files AS mf WITH ( NOLOCK ) ON fs.database_id = mf.database_id
+                                                             AND fs.[file_id] = mf.[file_id]
+ORDER BY avg_io_stall_ms DESC
+OPTION  ( RECOMPILE );
+
+
+--------------------------------------------
+--------PINAL DAVE
+--------------------------------------------
+SELECT DB_NAME(vfs.DbId) DatabaseName, mf.name,
+mf.physical_name, vfs.BytesRead, vfs.BytesWritten,
+vfs.IoStallMS, vfs.IoStallReadMS, vfs.IoStallWriteMS,
+vfs.NumberReads, vfs.NumberWrites,
+(Size*8)/1024 Size_MB
+FROM ::fn_virtualfilestats(NULL,NULL) vfs
+INNER JOIN sys.master_files mf ON mf.database_id = vfs.DbId
+AND mf.FILE_ID = vfs.FileId
+GO
+--------------------------------------------
+--------PINAL DAVE 2
+--------------------------------------------
+
+SELECT
+DB_NAME(mf.database_id) AS databaseName,
+name AS File_LogicalName,
+CASE
+WHEN type_desc = 'LOG' THEN 'Log File'
+WHEN type_desc = 'ROWS' THEN 'Data File'
+ELSE type_desc
+END AS File_type_desc
+,mf.physical_name
+,num_of_reads
+,num_of_bytes_read
+,io_stall_read_ms
+,num_of_writes
+,num_of_bytes_written
+,io_stall_write_ms
+,io_stall
+,size_on_disk_bytes
+,size_on_disk_bytes/ 1024 AS size_on_disk_KB
+,size_on_disk_bytes/ 1024 / 1024 AS size_on_disk_MB
+,size_on_disk_bytes/ 1024 / 1024 / 1024 AS size_on_disk_GB
+FROM sys.dm_io_virtual_file_stats(NULL, NULL) AS divfs
+JOIN sys.master_files AS mf ON mf.database_id = divfs.database_id
+AND mf.FILE_ID = divfs.FILE_ID
+ORDER BY num_of_Reads DESC
+go
