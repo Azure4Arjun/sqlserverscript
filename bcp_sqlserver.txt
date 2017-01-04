@@ -1,0 +1,8 @@
+Set Server=Ip ou nome do servidor
+Set Username=Usuario
+Set Password=senha
+Set Arquivo=localização do arquivo bcp com path
+Set Log= localização do arquivo de log  com path 
+bcp bancodedados..tabela OUT %Arquivo% -o %Log% -S%Server% -U%Username% -P%Password% -c
+pause
+

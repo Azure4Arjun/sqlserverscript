@@ -1,0 +1,1 @@
+select 'kill ',spid from master..sysprocesses where dbid=db_id('grcr')

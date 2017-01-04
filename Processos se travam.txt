@@ -1,0 +1,11 @@
+sp_who
+
+kill 56
+
+kill 55
+
+use master
+go
+select * from sysprocesses where spid = '55'
+sp_lock
+select * from sysprocesses where spid = '56'

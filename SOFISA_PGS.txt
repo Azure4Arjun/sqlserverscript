@@ -1,0 +1,17 @@
+select @@servername as Servidor
+go
+select user_name() as Usuário
+go
+use PGS_B
+go
+select db_name() as Banco
+go
+sp_help P_CONSULTACLIENTE
+go
+use PGS_A
+go
+select db_name() as Banco 
+go
+sp_help P_CONSULTACLIENTE
+go
+

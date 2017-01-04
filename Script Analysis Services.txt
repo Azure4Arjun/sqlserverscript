@@ -1,0 +1,5 @@
+SCRIPTS ANALYSIS SERVICES
+
+http://www.ssas-info.com/analysis-services-scripts/1210-powershell-script-to-list-info-about-one-analysis-services-database
+
+http://www.ssas-info.com/analysis-services-scripts/1197-powershell-script-to-list-info-about-ssas-databases

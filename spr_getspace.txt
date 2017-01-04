@@ -1,0 +1,197 @@
+CREATE PROCEDURE [spr_getspace](@dbname nvarchar(128) = NULL, @threshold decimal(5,2) = NULL)
+
+AS
+
+set nocount on
+
+
+
+DECLARE @stmt nvarchar(1000)
+
+
+
+CREATE TABLE #showfilestats_final (
+
+	database_name	nvarchar(128),
+
+	total	DECIMAL(15,2),
+
+	ocupied DECIMAL(15,2),
+
+	Livre	DECIMAL(15,2)
+
+)
+
+CREATE TABLE #showlogstats (
+
+	database_name	nvarchar(128),
+
+	logtotal DECIMAL(15,2),
+
+	ocupied DECIMAL(15,2),
+
+	Status INT
+
+)
+
+
+
+EXEC sp_MSforeachdb @command1 = '
+
+USE [?]
+
+SET NOCOUNT ON
+
+
+
+CREATE TABLE #showfilestats (
+
+	Fileid	INT,
+
+	FileGroup INT,
+
+	totalExtents DECIMAL(15),
+
+	UsedExtents DECIMAL(15),
+
+	Name VARCHAR(255),
+
+	FileName VARCHAR(255))
+
+
+
+INSERT INTO #showfilestats
+
+EXEC (''DBCC SHOWFILESTATS WITH NO_INFOMSGS'')
+
+
+
+INSERT INTO #showfilestats_final
+
+SELECT	''?'',
+
+	total = totalExtents*65536/1024/1024,
+
+	ocupied = UsedExtents*65536/1024/1024,
+
+	Livre = totalExtents*65536/1024/1024 - UsedExtents*65536/1024/1024
+
+FROM	#showfilestats
+
+
+
+DROP TABLE #showfilestats'
+
+
+
+INSERT INTO #showlogstats
+
+EXEC ('DBCC SQLPERF(LOGSPACE)')
+
+
+
+IF NOT REPLACE(@@VERSION, '  ', ' ') LIKE 'Microsoft SQL Server 7%'
+
+BEGIN
+
+	SELECT @stmt = 'SELECT	server = CONVERT(VARCHAR,@@SERVERNAME),
+
+			instance = CONVERT(VARCHAR,ISNULL(SERVERPROPERTY(''InstanceName''), @@SERVERNAME)),
+
+			database_name = CONVERT(VARCHAR,A.database_name),
+
+			database_size_MB = A.total,
+
+			free_space_MB = A.Livre,
+
+			percent_ocupied = 100 - CONVERT(DECIMAL(5,2),A.Livre * 100.0 / total),
+
+			logfile_size_MB = B.logtotal,
+
+			logfile_used = B.ocupied,
+
+			date = GETDATE()
+
+		FROM	#showfilestats_final A
+
+			inner join #showlogstats B on A.database_name = B.database_name
+
+		WHERE	A.database_name != ''model'' '
+
+END
+
+ELSE
+
+BEGIN
+
+	SELECT @stmt = 'SELECT	server = CONVERT(VARCHAR,@@SERVERNAME),
+
+			instance = CONVERT(VARCHAR,@@SERVERNAME),
+
+			database_name = CONVERT(VARCHAR,A.database_name),
+
+			database_size_MB = A.total,
+
+			free_space_MB = A.Livre,
+
+			percent_ocupied = 100 - CONVERT(DECIMAL(5,2),A.Livre * 100.0 / total),
+
+			logfile_size_MB = B.logtotal,
+
+			logfile_used = B.ocupied,
+
+			date = GETDATE()
+
+		FROM	#showfilestats_final A
+
+			inner join #showlogstats B on A.database_name = B.database_name
+
+		WHERE	A.database_name != ''model'' '
+
+END
+
+
+
+IF @dbname IS NOT NULL
+
+BEGIN
+
+	SELECT @stmt = @stmt + '
+
+	AND A.database_name like ''' + @dbname + ''' '
+
+END
+
+
+
+IF NOT @threshold IS NULL
+
+BEGIN
+
+	SELECT @stmt = @stmt + '
+
+			AND 100 - CONVERT(DECIMAL(5,2),A.Livre * 100.0 / total) >= ' + CONVERT(VARCHAR, @threshold)
+
+END
+
+
+
+SELECT @stmt = @stmt + '
+
+		ORDER BY 1,2,3'
+
+		
+
+set nocount off
+
+
+
+EXEC(@stmt)
+
+
+
+
+
+DROP TABLE #showfilestats_final
+
+DROP TABLE #showlogstats

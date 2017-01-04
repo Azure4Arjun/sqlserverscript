@@ -1,0 +1,10 @@
+DECLARE @tcp_port nvarchar(5)
+
+EXEC xp_regread
+@rootkey    =    'HKEY_LOCAL_MACHINE',
+@key        =    'SOFTWARE\MICROSOFT\MSSQLSERVER\MSSQLSERVER\SUPERSOCKETNETLIB\TCP',
+@value_name    =    'TcpPort',
+@value        =    @tcp_port OUTPUT
+
+select @tcp_port
+

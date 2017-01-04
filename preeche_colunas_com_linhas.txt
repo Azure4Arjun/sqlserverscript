@@ -1,0 +1,28 @@
+update tblcliente set 
+tblcliente.codCampo2 = tt.codcampo2, 
+tblcliente.codCampo4 = tt.codcampo4,
+tblcliente.codCampo6 = tt.codcampo6,
+tblcliente.codCampo8 = tt.codcampo8,
+tblcliente.codCampo10 = tt.codcampo10,
+tblcliente.codCampo11 = tt.codcampo11,
+tblcliente.codCampo12 = tt.codcampo12,
+tblcliente.codCampo26 = tt.codcampo26,
+tblcliente.codCampo27 = tt.codcampo27,
+tblcliente.codCampo61 = tt.codcampo61
+from tblcliente
+inner join  
+(select codcliente,
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 2) as codcampo2,
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 4) as codcampo4,
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 6) as codcampo6,
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 8) as codcampo8,
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 10) as codcampo10,
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 11) as codcampo11,	
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 12) as codcampo12,
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 26) as codcampo26,
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 27) as codcampo27,
+	(select valor from tblclientedetalhe t2 where t1.codcliente = t2.codcliente and t2.codcampo = 61) as codcampo61
+from tblcliente t1) as tt
+on tblcliente.codcliente = tt.codcliente
+
+

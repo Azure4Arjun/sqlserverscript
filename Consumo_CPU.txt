@@ -1,0 +1,31 @@
+'sp_who active' ver conexões ativas;
+
+
+Analisar se existem processos travados.
+Ana]isar quais estão com status RUNNABLE.
+Analisar na coluna 'BlkBy' (Blocked By) ver quem está bloqueando quem.
+Analisar em 'command' o que ele está fazendo.
+DiskIO qnto está utilizando
+
+
+
+dbcc traceon(3604) --> habilita a saida do comando a seguir
+
+dbcc inputbuffer('spid') --> Mostra o que o determinado 'spid' está executando
+
+--pode utilizar tmb :
+
+
+select * from ::fn_get_sql(0x02003C0038EC804E000000000100000000000000)
+
+sendo q o parâmetro da função é a coluna sql_handle da sysprocesses.
+
+
+Exemplo :
+
+sp_who
+--depois ver qm esta bloquendo, analisar um a um
+sp_who '223'
+sp_who '64'
+sp_who '263'
+sp_who '145'

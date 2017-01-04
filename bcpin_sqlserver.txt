@@ -1,0 +1,16 @@
+Set Server=IP
+
+Set DbUser=sa
+
+Set DbPwd=SENHA
+
+ 
+
+Bcp BD..TABELA IN CAMINHO\tabela.bcp –o CAMINHO\tabela.log_imp –S%Server% -U%DbUser% -P%DbPwd% -c
+
+Bcp BD..TABELA2 IN CAMINHO\tabela2.bcp –o CAMINHO\tabela2.log_imp –S%Server% -U%DbUser% -P%DbPwd% -c
+
+ 
+
+pause
+

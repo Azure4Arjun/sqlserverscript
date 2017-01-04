@@ -1,0 +1,4 @@
+select @@servername
+go
+dbcc sqlperf (waitstats)
+go

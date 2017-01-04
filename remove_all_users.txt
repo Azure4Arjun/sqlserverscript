@@ -1,0 +1,34 @@
+
+-- script dropa todos users
+sp_msforeachdb 'USE [?]
+SET NOCOUNT ON
+select ''USE '' + db_name() + CHAR (10) + ''go''
+select ''sp_dropuser '' + 
+"''" + 
+name + 
+"''" + 
+CHAR (10) + 
+''go'' + 
+CHAR (10)
+from sysusers where name like ''LATAM%''
+or name like ''IPSOS&'''
+
+
+
+-- script remove users da role sa
+
+SELECT 'sp_dropsrvrolemember ' + '''' + SPMember.name + '''' + ',' + '''' + SPRole.name + '''' + char (10) + 'go' + char (10)
+FROM master.sys.server_principals SPRole 
+ INNER JOIN master.sys.server_role_members SRM ON SPRole.principal_id = SRM.role_principal_id 
+ INNER JOIN master.sys.[server_principals] AS SPMember ON SRM.[member_principal_id] = SPMember.principal_id
+ AND SPMember.name NOT IN ('LATAM\rafael.goncalez','LATAM\alfredo.lissi')
+ AND (SPMember.name LIKE ('IPSOS%') OR SPMember.name LIKE ('LATAM%'))
+
+-- basead neste link http://www.mssqltips.com/sqlservertip/1991/identifying-sql-server-logins-with-overlapping-server-roles/
+
+-- cria  logins para users nao orfãos
+sp_msforeachdb 'USE [?]
+select ''CREATE LOGIN ['' + su.name + ''] FROM WINDOWS'' from sysusers su
+left join master..syslogins sl on su.name collate Latin1_General_CI_AI = sl.name collate Latin1_General_CI_AI
+where (su.name like ''LATAM%'' or su.name like ''IPSOSGROUP%'') and sl.name is NULL'
+

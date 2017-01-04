@@ -1,0 +1,1 @@
+https://sqlperformance.com/2014/05/t-sql-queries/dude-who-owns-that-temp-table

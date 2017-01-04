@@ -1,0 +1,36 @@
+Quando fizer o restore para um banco novo, usar essa query.
+ ----------------------------------
+Quando o banco já existir, a prioridade é sobrepor os arquivos de dados e log ja existentes, nos respectivos diretorios.
+----------------------------------
+Quando o banco não existe, ele irá tentar criar os arquivos na mesma unidade do backup
+
+
+
+============================================
+
+RESTORE FILELISTONLY
+FROM DISK = 'G:\MSSQL\BACKUP\BKPSQLCOMP\INC1191137\Db_CUstHistTeste_clone.bkp' 
+
+Pega o data file e o log file daqui e joga no 'move'.
+_____________________________
+
+
+RESTORE DATABASE Db_CustHistMx 
+FROM DISK = 'G:\MSSQL\BACKUP\BKPSQLCOMP\INC1191137\Db_CUstHistTeste_clone.bkp'
+WITH MOVE 'Db_CustHist_Data' TO 'g:\MSSQL\data\Db_CustHistMx_Data.MDF',
+     MOVE 'Db_CustHist_Log'  TO 'g:\MSSQL\data\Db_CustHistMx_Log.LDF',
+REPLACE, STATS = 5
+go
+
+
++++++++++++++++++++++++++++
+Restore Com stripes
+
+RESTORE DATABASE OPRK
+FROM DISK = 'E:\Backup\1006333\OPRK_1.BKP',
+	DISK = 'E:\Backup\1006333\OPRK_2.BKP',
+	DISK = 'E:\Backup\1006333\OPRK_3.BKP',
+	DISK = 'E:\Backup\1006333\OPRK_4.BKP',
+	DISK = 'E:\Backup\1006333\OPRK_5.BKP',
+	DISK = 'E:\Backup\1006333\OPRK_6.BKP'
+with REPLACE, stats = 1

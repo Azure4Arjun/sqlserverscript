@@ -1,0 +1,88 @@
+DECLARE @date VARCHAR(510)
+DECLARE @time VARCHAR(510)
+DECLARE @source VARCHAR(510)
+DECLARE @destination VARCHAR(510)
+DECLARE @status VARCHAR(510)
+DECLARE @rule VARCHAR(510)
+DECLARE @session_ID VARCHAR(510)
+DECLARE @connection_ID VARCHAR(510)
+DECLARE @GMT_Time VARCHAR(510)
+DECLARE @IP_Header VARCHAR(510)
+DECLARE @protocol_payload VARCHAR(510)
+DECLARE @count int
+
+DECLARE CUR_DELETE CURSOR FOR
+select [date],
+[time],
+[source],
+[destination],
+[status],
+[rule],
+[session_ID],
+[connection_ID],
+[GMT_Time], 
+IP_Header, 
+protocol_payload, 
+count(*)
+from tbl_logfws
+group by [date],
+[time],
+[source],
+[destination],
+[status],
+[rule],
+[session_ID],
+[connection_ID],
+[GMT_Time], 
+IP_Header, 
+protocol_payload
+having COUNT(*) > 1
+
+OPEN CUR_DELETE
+
+FETCH NEXT FROM CUR_DELETE INTO @date,
+@time,
+@source,
+@destination,
+@status,
+@rule,
+@session_ID,
+@connection_ID,
+@GMT_Time,
+@IP_Header,
+@protocol_payload,
+@count
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+DELETE TOP(@count - 1) FROM [tbl_LogFWS] WHERE [date]=	@date and
+[time]=	@time and
+[source]=	@source and
+[destination]=	@destination and
+[status]=	@status and
+[rule]=	@rule and
+[session_ID]=	@session_ID and
+[connection_ID]=	@connection_ID and
+[GMT_Time]=	@GMT_Time and
+[IP_Header]=	@IP_Header and
+[protocol_payload]=	@protocol_payload
+
+
+
+FETCH NEXT FROM CUR_DELETE INTO @date,
+@time,
+@source,
+@destination,
+@status,
+@rule,
+@session_ID,
+@connection_ID,
+@GMT_Time,
+@IP_Header,
+@protocol_payload,
+@count
+
+END
+
+CLOSE CUR_DELETE
+DEALLOCATE CUR_DELETE

@@ -1,0 +1,1 @@
+select 'kill ',spid from sysprocesses where hostname = 'op3rafs'

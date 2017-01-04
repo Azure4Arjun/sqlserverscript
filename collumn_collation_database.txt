@@ -1,0 +1,10 @@
+ sp_msforeachdb 'use [?] SET NOCOUNT ON 
+    IF (db_name() not in (''master'',''msdb'',''tempdb'',''model'',''t4bdb01'',''ReportServer'',''ReportServerTempDB'')) 
+    BEGIN
+    select db_name() as dbname, 
+    object_name(object_id) as table_name, 
+    name as column_name, 
+    collation_name
+    from sys.columns where collation_name <> ''NULL'' 
+    END' 
+			

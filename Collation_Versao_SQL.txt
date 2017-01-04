@@ -1,0 +1,4 @@
+select @@version
+
+select serverproperty('edition')
+select serverproperty('productlevel')

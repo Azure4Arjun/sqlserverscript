@@ -1,0 +1,57 @@
+Alterando o diretório do arquivo de dados.
+Para arquivo de dados alterar na 'sysaltfiles' e 'sysdatabases'
+Para log apenas na sysaltfiles
+
+
+EXEMPLO:
+	UPDATE sysaltfiles
+	SET filename = 'E:\MSSQL$COGNOS\DATA\model_data.mdf'
+	WHERE name = 'modeldev'
+
+	UPDATE sysdatabases
+	SET filename = 'E:\MSSQL$COGNOS\DATA\model_data.mdf'
+	WHERE name = 'model'
+
+
+SELECT FILENAME,* FROM sysaltfiles
+	WHERE name = 'modeldev'
+
+
+SELECT FILENAME,* FROM sysdatabases
+	WHERE name = 'model'
+
+sp_configure 'allow update',1
+reconfigure with override
+
+************************************************************************
+
+select * from sysaltfiles
+
+
+UPDATE SYSALTFILES
+SET filename = 'F:\MSSQL$CCC1DES\LOG\templog.ldf'
+where name = 'templog'
+
+UPDATE SYSALTFILES
+SET filename = 'F:\MSSQL$CCC1DES\LOG\mastlog.ldf'
+where name = 'mastlog'
+
+
+UPDATE SYSALTFILES
+SET filename = 'F:\MSSQL$CCC1DES\LOG\modellog.ldf'
+where name = 'modellog'
+
+
+UPDATE SYSALTFILES
+SET filename = 'F:\MSSQL$CCC1DES\LOG\msdblog.ldf'
+where name = 'MSDBLog'
+
+
+UPDATE SYSALTFILES
+SET filename = 'F:\MSSQL$CCC1DES\LOG\pubs_log.ldf'
+where name = 'pubs_log'
+
+
+UPDATE SYSALTFILES
+SET filename = 'F:\MSSQL$CCC1DES\LOG\northwnd.ldf'
+where name = 'Northwind_log'

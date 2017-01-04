@@ -1,0 +1,350 @@
+-------------------------- -------------------------------------------------
+------------------------INVENTARIO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT  d.name ,
+        MAX(b.backup_finish_date) AS last_backup_finish_date
+FROM    master.sys.databases d
+        LEFT OUTER JOIN msdb.dbo.backupset b ON d.name = b.database_name
+                                                AND b.type = 'D'
+WHERE   d.database_id NOT IN ( 2, 3 ) 
+GROUP BY d.name
+ORDER BY 2 DESC
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT TOP 100
+        physical_device_name ,
+        *
+FROM    msdb.dbo.backupmediafamily
+ORDER BY media_set_id DESC
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT  d.name ,
+        d.recovery_model ,
+        d.recovery_model_desc
+FROM    master.sys.databases d
+        LEFT OUTER JOIN msdb.dbo.backupset b ON d.name = b.database_name
+                                                AND b.type = 'L'
+WHERE   d.recovery_model IN ( 1, 2 )
+        AND b.type IS NULL
+        AND d.database_id NOT IN ( 2, 3 )
+		
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT TOP 1
+        backup_start_date
+FROM    msdb.dbo.backupset WITH ( NOLOCK )
+ORDER BY backup_set_id ASC
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+CREATE TABLE #temp
+    (
+      ParentObject VARCHAR(255) ,
+      [Object] VARCHAR(255) ,
+      Field VARCHAR(255) ,
+      [Value] VARCHAR(255)
+    )   
+   
+CREATE TABLE #DBCCResults
+    (
+      ServerName VARCHAR(255) ,
+      DBName VARCHAR(255) ,
+      LastCleanDBCCDate DATETIME
+    )   
+    
+EXEC master.dbo.sp_MSforeachdb @command1 = 'USE ? INSERT INTO #temp EXECUTE (''DBCC DBINFO WITH TABLERESULTS'')',
+    @command2 = 'INSERT INTO #DBCCResults SELECT @@SERVERNAME, ''?'', Value FROM #temp WHERE Field = ''dbi_dbccLastKnownGood''',
+    @command3 = 'TRUNCATE TABLE #temp'   
+   
+   --Delete duplicates due to a bug in SQL Server 2008
+   
+   ;
+WITH    DBCC_CTE
+          AS ( SELECT   ROW_NUMBER() OVER ( PARTITION BY ServerName, DBName,
+                                            LastCleanDBCCDate ORDER BY LastCleanDBCCDate ) RowID
+               FROM     #DBCCResults
+             )
+    DELETE  FROM DBCC_CTE
+    WHERE   RowID > 1 ;
+   
+SELECT  ServerName ,
+        DBName ,
+        CASE LastCleanDBCCDate
+          WHEN '1900-01-01 00:00:00.000' THEN 'Never ran DBCC CHECKDB'
+          ELSE CAST(LastCleanDBCCDate AS VARCHAR)
+        END AS LastCleanDBCCDate
+FROM    #DBCCResults
+ORDER BY 3
+   
+DROP TABLE #temp, #DBCCResults ;
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SET  NOCOUNT ON
+DECLARE @MaxLength INT
+SET @MaxLength = 50
+ 
+DECLARE @xp_results TABLE
+    (
+      job_id UNIQUEIDENTIFIER NOT NULL ,
+      last_run_date NVARCHAR(20) NOT NULL ,
+      last_run_time NVARCHAR(20) NOT NULL ,
+      next_run_date NVARCHAR(20) NOT NULL ,
+      next_run_time NVARCHAR(20) NOT NULL ,
+      next_run_schedule_id INT NOT NULL ,
+      requested_to_run INT NOT NULL ,
+      request_source INT NOT NULL ,
+      request_source_id SYSNAME COLLATE database_default
+                                NULL ,
+      running INT NOT NULL ,
+      current_step INT NOT NULL ,
+      current_retry_attempt INT NOT NULL ,
+      job_state INT NOT NULL
+    )
+ 
+DECLARE @job_owner SYSNAME
+ 
+DECLARE @is_sysadmin INT
+SET @is_sysadmin = ISNULL(IS_SRVROLEMEMBER('sysadmin'), 0)
+SET @job_owner = SUSER_SNAME()
+ 
+INSERT  INTO @xp_results
+        EXECUTE sys.xp_sqlagent_enum_jobs @is_sysadmin, @job_owner
+ 
+UPDATE  @xp_results
+SET     last_run_time = RIGHT('000000' + last_run_time, 6) ,
+        next_run_time = RIGHT('000000' + next_run_time, 6)
+ 
+SELECT  j.name AS JobName ,
+        j.enabled AS Enabled ,
+        sl.name AS OwnerName ,
+        CASE x.running
+          WHEN 1 THEN 'Running'
+          ELSE CASE h.run_status
+                 WHEN 2 THEN 'Inactive'
+                 WHEN 4 THEN 'Inactive'
+                 ELSE 'Completed'
+               END
+        END AS CurrentStatus ,
+        COALESCE(x.current_step, 0) AS CurrentStepNbr ,
+        CASE WHEN x.last_run_date > 0
+             THEN CONVERT (DATETIME, SUBSTRING(x.last_run_date, 1, 4) + '-'
+                  + SUBSTRING(x.last_run_date, 5, 2) + '-'
+                  + SUBSTRING(x.last_run_date, 7, 2) + ' '
+                  + SUBSTRING(x.last_run_time, 1, 2) + ':'
+                  + SUBSTRING(x.last_run_time, 3, 2) + ':'
+                  + SUBSTRING(x.last_run_time, 5, 2) + '.000', 121)
+             ELSE NULL
+        END AS LastRunTime ,
+        CASE h.run_status
+          WHEN 0 THEN 'Fail'
+          WHEN 1 THEN 'Success'
+          WHEN 2 THEN 'Retry'
+          WHEN 3 THEN 'Cancel'
+          WHEN 4 THEN 'In progress'
+        END AS LastRunOutcome ,
+        CASE WHEN h.run_duration > 0
+             THEN ( h.run_duration / 1000000 ) * ( 3600 * 24 )
+                  + ( h.run_duration / 10000 % 100 ) * 3600 + ( h.run_duration
+                                                              / 100 % 100 )
+                  * 60 + ( h.run_duration % 100 )
+             ELSE NULL
+        END AS LastRunDuration
+FROM    @xp_results x
+        LEFT JOIN msdb.dbo.sysjobs j ON x.job_id = j.job_id
+        LEFT OUTER JOIN msdb.dbo.syscategories c ON j.category_id = c.category_id
+        LEFT OUTER JOIN msdb.dbo.sysjobhistory h ON x.job_id = h.job_id
+                                                    AND x.last_run_date = h.run_date
+                                                    AND x.last_run_time = h.run_time
+                                                    AND h.step_id = 0
+        LEFT OUTER JOIN sys.syslogins sl ON j.owner_sid = sl.sid
+		
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT  *
+FROM    sys.databases
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+CREATE TABLE #DatabaseFiles
+    (
+      [database_name] [sysname] NOT NULL ,
+      [file_id] [int] NOT NULL ,
+      [file_guid] [uniqueidentifier] NULL ,
+      [type] [tinyint] NOT NULL ,
+      [type_desc] [nvarchar](60) NULL ,
+      [data_space_id] [int] NOT NULL ,
+      [name] [sysname] NOT NULL ,
+      [physical_name] [nvarchar](260) NOT NULL ,
+      [state] [tinyint] NULL ,
+      [state_desc] [nvarchar](60) NULL ,
+      [size] [int] NOT NULL ,
+      [max_size] [int] NOT NULL ,
+      [growth] [int] NOT NULL ,
+      [is_media_read_only] [bit] NOT NULL ,
+      [is_read_only] [bit] NOT NULL ,
+      [is_sparse] [bit] NOT NULL ,
+      [is_percent_growth] [bit] NOT NULL ,
+      [is_name_reserved] [bit] NOT NULL ,
+      [create_lsn] [numeric](25, 0) NULL ,
+      [drop_lsn] [numeric](25, 0) NULL ,
+      [read_only_lsn] [numeric](25, 0) NULL ,
+      [read_write_lsn] [numeric](25, 0) NULL ,
+      [differential_base_lsn] [numeric](25, 0) NULL ,
+      [differential_base_guid] [uniqueidentifier] NULL ,
+      [differential_base_time] [datetime] NULL ,
+      [redo_start_lsn] [numeric](25, 0) NULL ,
+      [redo_start_fork_guid] [uniqueidentifier] NULL ,
+      [redo_target_lsn] [numeric](25, 0) NULL ,
+      [redo_target_fork_guid] [uniqueidentifier] NULL ,
+      [backup_lsn] [numeric](25, 0) NULL
+    )
+EXEC dbo.sp_MSforeachdb 'INSERT INTO #DatabaseFiles SELECT ''[?]'' AS database_name, * FROM [?].sys.database_files'
+SELECT  *
+FROM    #DatabaseFiles
+ORDER BY database_name ,
+        type_desc
+DROP TABLE #DatabaseFiles
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+EXEC dbo.sp_MSforeachdb 'SELECT (''O ? BANCO TEM OS LOG LOCALIZADOS EM '' + LEFT(physical_name, 1) + ''.'') FROM [?].sys.database_files WHERE type_desc = ''LOG'' AND ''?'' <> ''[tempdb]'' GROUP BY LEFT(physical_name, 1) HAVING COUNT(*) > 1' ;
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+EXEC dbo.sp_MSforeachdb 'SELECT ''[?]'' AS database_name, o.name AS table_name, t.* FROM [?].sys.triggers t INNER JOIN [?].sys.objects o ON t.parent_id = o.object_id'
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+EXEC dbo.sp_MSforeachdb 'SELECT DisabledIndexes = ''O indice [?].['' + s.name + ''].['' + o.name + ''].['' + i.name + ''] esta desabilitado.'' from [?].sys.indexes i INNER JOIN [?].sys.objects o ON i.object_id = o.object_id INNER JOIN [?].sys.schemas s ON o.schema_id = s.schema_id WHERE i.is_disabled = 1' ;
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+EXEC dbo.sp_MSforeachdb 'SELECT FK_NAO_CONFIAVEIS = (''A foreign key [?].['' + s.name + ''].['' + o.name + ''].['' + i.name + ''] nao eh confiavel.'') from [?].sys.foreign_keys i INNER JOIN [?].sys.objects o ON i.parent_object_id = o.object_id INNER JOIN [?].sys.schemas s ON o.schema_id = s.schema_id WHERE i.is_not_trusted = 1' ;
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+EXEC dbo.sp_MSforeachdb 'SELECT ''[?]'' AS database_name, * FROM [?].sys.plan_guides WHERE is_disabled = 0'
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT  *
+FROM    sys.dm_os_sys_memory
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT  @@SERVERNAME AS ServerName ,
+        YEAR(backup_finish_date) AS backup_year ,
+        MONTH(backup_finish_date) AS backup_month ,
+        CAST(AVG(( backup_size / ( DATEDIFF(ss, bset.backup_start_date,
+                                            bset.backup_finish_date) )
+                   / 1048576 )) AS INT) AS throughput_mb_sec_avg ,
+        CAST(MIN(( backup_size / ( DATEDIFF(ss, bset.backup_start_date,
+                                            bset.backup_finish_date) )
+                   / 1048576 )) AS INT) AS throughput_mb_sec_min ,
+        CAST(MAX(( backup_size / ( DATEDIFF(ss, bset.backup_start_date,
+                                            bset.backup_finish_date) )
+                   / 1048576 )) AS INT) AS throughput_mb_sec_max
+FROM    msdb.dbo.backupset bset
+WHERE   bset.type = 'D' 
+        AND bset.backup_size > 5368709120 
+        AND DATEDIFF(ss, bset.backup_start_date, bset.backup_finish_date) > 1 
+GROUP BY YEAR(backup_finish_date) ,
+        MONTH(backup_finish_date)
+ORDER BY @@SERVERNAME ,
+        YEAR(backup_finish_date) DESC ,
+        MONTH(backup_finish_date) DESC
+		
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT  @@SERVERNAME AS ServerName ,
+        database_name ,
+        YEAR(backup_finish_date) AS backup_year ,
+        MONTH(backup_finish_date) AS backup_month ,
+        CAST(AVG(( backup_size / ( DATEDIFF(ss, bset.backup_start_date,
+                                            bset.backup_finish_date) )
+                   / 1048576 )) AS INT) AS throughput_mb_sec_avg ,
+        CAST(MIN(( backup_size / ( DATEDIFF(ss, bset.backup_start_date,
+                                            bset.backup_finish_date) )
+                   / 1048576 )) AS INT) AS throughput_mb_sec_min ,
+        CAST(MAX(( backup_size / ( DATEDIFF(ss, bset.backup_start_date,
+                                            bset.backup_finish_date) )
+                   / 1048576 )) AS INT) AS throughput_mb_sec_max
+FROM    msdb.dbo.backupset bset
+WHERE   bset.type = 'D' 
+        AND bset.backup_size > 5368709120 
+        AND DATEDIFF(ss, bset.backup_start_date, bset.backup_finish_date) > 1 
+GROUP BY database_name ,
+        YEAR(backup_finish_date) ,
+        MONTH(backup_finish_date)
+ORDER BY @@SERVERNAME ,
+        database_name ,
+        YEAR(backup_finish_date) DESC ,
+        MONTH(backup_finish_date) DESC
+		
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT  CASE database_id
+          WHEN 32767 THEN 'ResourceDb'
+          ELSE DB_NAME(database_id)
+        END AS database_name ,
+        COUNT(*) AS cached_pages_count ,
+        COUNT(*) * .0078125 AS cached_megabytes /* Each page is 8kb, which is .0078125 of an MB */
+FROM    sys.dm_os_buffer_descriptors
+GROUP BY DB_NAME(database_id) ,
+        database_id
+ORDER BY cached_pages_count DESC ;
+
+---------------------------------------------------------------------------
+-----------------------------BLOCO-----------------------------------------
+---------------------------------------------------------------------------
+
+SELECT  db.name AS databaseName ,
+        ps.OBJECT_ID AS objectID ,
+        ps.index_id AS indexID ,
+        ps.partition_number AS partitionNumber ,
+        ps.avg_fragmentation_in_percent AS fragmentation ,
+        ps.page_count
+FROM    sys.databases db
+        INNER JOIN sys.dm_db_index_physical_stats(NULL, NULL, NULL, NULL,
+                                                  N'Limited') ps ON db.database_id = ps.database_id
+WHERE   ps.index_id > 0
+        AND ps.page_count > 100
+        AND ps.avg_fragmentation_in_percent > 30
+OPTION  ( MAXDOP 1 ) ;
+

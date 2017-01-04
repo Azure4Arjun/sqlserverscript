@@ -1,0 +1,38 @@
+
+use [t4bdb01] -- nome do banco entre []
+go
+set quoted_identifier off
+declare @takeda varchar(50)
+
+declare @caipira varchar(50)
+
+create table #ligeiro (
+name varchar(50),
+rows int,
+reserved varchar(30),
+data varchar(30),
+index_size varchar(30),
+unused varchar(30)
+)
+
+
+
+select name into #cesar from sysobjects where type = 'U'
+
+	while (select count(*) from #cesar) > 0
+	begin
+
+	select top 1 @caipira = name from #cesar
+	select @takeda = "sp_spaceused " + "'" + @caipira + "'"
+	insert into #ligeiro exec (@takeda)
+	
+	delete from #cesar where name = @caipira
+	
+end
+
+select name, convert(int,(substring (reserved,1,len(reserved)-3)))as espaco_kb  from #ligeiro
+order by espaco_kb desc
+drop table #cesar
+drop table #ligeiro
+go
+

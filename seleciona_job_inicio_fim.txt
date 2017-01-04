@@ -1,0 +1,11 @@
+/*********************** Seleciona os Jobs executados que finalizaram com sucesso ***********************
+****************************** alterar o start_time para a data solititada ******************************
+********************************************************************************************************/
+select nom_job as job, start_time as hora_inicio, end_time as hora_fim, trunc(duracao) as duracao_segundos, arquivo_log as local_arqs
+       from vt4bstatusjobs_r0
+            where start_time >= to_date ('09/11/09 08:00','dd/mm/yy hh:mi') 
+                  and norm_name = upper ('trace_log_info') 
+                  and end_time is not null 
+                  and has_error = 0
+                  and nom_job = '2A7T_INFO_TRANSPORTE_JOB'
+order by start_time asc

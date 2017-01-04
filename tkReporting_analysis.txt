@@ -1,0 +1,125 @@
+
+WHILE (getdate() < '2015-09-17 14:50:16.470')
+BEGIN
+WAITFOR DELAY '00:00:01'
+
+  INSERT INTO trans_per_second_TKReporting
+  select getdate() as Date, *
+-- INTO trans_per_second_TKReporting
+  FROM  sys.dm_os_performance_counters
+  WHERE counter_name = 'transactions/sec'
+	AND instance_name = 'TKReporting'
+--  TRUNCATE TABLE trans_per_second_TKReporting
+END
+
+--truncate table trans_per_second_drop_later4
+SELECT count(*)
+SELECT instance_name
+    , max(cntr_value) as last
+    , min(cntr_value) as first
+    , count(cntr_value) as ocurrency
+    , (max(cntr_value) - min(cntr_value)) / count(cntr_value) as transaction_per_second
+    , max(cntr_value) - min(cntr_value)
+FROM  trans_per_second_TKReporting with (nolock)
+GROUP BY instance_name
+ORDER BY instance_name
+
+
+;with cte as
+(
+select * ,
+ROW_NUMBER() over (order by Date) as rn
+from trans_per_second_TKReporting
+WHERE instance_name = 'TKReporting'
+
+)
+
+SELECT t1.cntr_value - t2.cntr_value as Total_trans_last_sec,
+t1.Date as created
+FROM cte t1 
+  INNER JOIN cte t2
+    ON t1.rn = t2.rn+1
+WHERE t1.Date BETWEEN '2015-09-17 03:59:00' AND '2015-09-17 06:00:00'
+--AND t1.cntr_value - t2.cntr_value <> 0
+ORDER BY Total_trans_last_sec
+
+
+
+----------------------
+
+
+
+SELECT instance_name
+    , max(cntr_value) as last
+    , min(cntr_value) as first
+    , count(cntr_value) as ocurrency
+    , (max(cntr_value) - min(cntr_value)) / count(cntr_value) as transaction_per_second
+    , max(cntr_value) - min(cntr_value)
+FROM  trans_per_second_TKReporting with (nolock)
+GROUP BY instance_name
+ORDER BY instance_name
+
+
+;with cte as
+(
+select * ,
+ROW_NUMBER() over (order by Date) as rn
+from trans_per_second_TKReporting
+WHERE instance_name = 'TKReporting'
+
+)
+
+--sp_spaceused trans_per_second_TKReporting1
+
+SELECT database_name
+, CONVERT(datetime, t2.report_second) as created
+, total
+FROM (
+    SELECT 
+		  'TkReporting' as database_name,
+          CONVERT(VARCHAR, DATEPART(YEAR, created))  + '-' +
+          CONVERT(VARCHAR, DATEPART(MONTH, created))  + '-' +
+          CONVERT(VARCHAR, DATEPART(DAY, created))  + ' ' +
+          CONVERT(VARCHAR, DATEPART(HOUR, created)) + ':00:00' as report_second,
+--
+--          CASE WHEN CONVERT(VARCHAR,(DATEPART(MINUTE, created) / 30)) = 0 THEN '00'
+--               WHEN CONVERT(VARCHAR,(DATEPART(MINUTE, created) / 30)) = 1 THEN '30'
+--               END hour,
+          SUM(Total_trans_last_sec) total
+		FROM (
+          SELECT t1.cntr_value - t2.cntr_value as Total_trans_last_sec,
+          t1.Date as created
+          FROM cte t1 
+          INNER JOIN cte t2
+          ON t1.rn = t2.rn+1
+    ) x1
+    GROUP BY
+		          DATEPART(YEAR, created),
+          DATEPART(MONTH, created),
+          DATEPART(DAY, created),
+          DATEPART(HOUR, created)
+) t2
+ORDER BY created
+
+--WHERE DATEPART(hour,hour) BETWEEN 9 AND 17
+--ORDER BY created
+
+
+
+;with cte as
+(
+select * ,
+ROW_NUMBER() over (order by Date) as rn
+from trans_per_second_TKReporting
+WHERE instance_name = 'TKReporting'
+
+)
+
+SELECT t1.cntr_value - t2.cntr_value as Total_trans_last_sec,
+t1.Date as created
+FROM cte t1 
+  INNER JOIN cte t2
+    ON t1.rn = t2.rn+1
+--WHERE t1.Date BETWEEN '2015-09-17 03:59:00' AND '2015-09-17 06:00:00'
+--AND t1.cntr_value - t2.cntr_value <> 0
+--ORDER BY Total_trans_last_sec

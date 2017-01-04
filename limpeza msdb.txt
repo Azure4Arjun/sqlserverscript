@@ -1,0 +1,14 @@
+a sua MSDB está ficando grande pois nela ficam guardadas informações sobre histórico de execução de jobs e backups. Para isso, é preciso fazer a limpeza desses históricos. Dentro dos planos de manutenção do SQL Server existe uma tarefa que é chamada de "History Cleanup Task", usada exatamente para excluir esse histórico. Recomendo manter pelo menos 1 mês de informação, o resto pode ser excluído.
+
+
+Essa task executa basicamente este código:
+
+
+declare @dt datetime select @dt = cast(N'2009-10-20T08:50:48' as datetime)
+exec msdb.dbo.sp_delete_backuphistory @dt
+GO
+EXEC msdb.dbo.sp_purge_jobhistory  @oldest_date='2009-10-20T08:50:48'
+GO
+EXECUTE msdb..sp_maintplan_delete_log null,null,'2009-10-20T08:50:48'
+
+

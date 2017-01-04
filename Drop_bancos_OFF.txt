@@ -1,0 +1,9 @@
+select + 'DROP DATABASE ' + name + char(13) + 'go' from sysdatabases
+where status &512 != 0
+order by name
+
+--a coluna status são "categorias" do status q é definido por tudo o q o status "contém",(shift+F1 na 'sysdatabases' para entender)
+
+
+qndo fazemos "where status &512 != 0 " vc procura todo valor de status que contém 512.
+ex: select name, status &512 from sysdatabases

@@ -1,0 +1,7 @@
+SELECT * FROM sys.traces
+
+SELECT * FROM fn_trace_getinfo(default)
+
+0= stopped
+1= running
+2= destroy

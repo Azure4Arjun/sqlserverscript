@@ -1,0 +1,26 @@
+UOLDiveo
+Stop do banco de dados do WMS, TMS, PCA e 4O
+
+-PCA
+ACSXS6 
+
+checkpoint all
+shutdown with nowait
+
+
+##-TMS
+##ACSWTMSDB
+##ACSXMB5 
+##ACSWTMDBQ
+##ACSXMB2 
+
+-WMS
+ACSWDB3		- Instancias: (ACSWMA0, ACSWMD0, ACSWMD1)
+ACSWDBWDBWMS03  - Instancias: (ACSWMP0 - cluster)
+ACSWDBWMS01	- Instancias: (ACSWMP0 - cluster)
+ACSWDBWMS02	- Instancias: (ACSWMP0 - cluster)
+##ACSXMB3
+##ACSXMB4
+
+##-4O
+##ACSLO9

@@ -1,0 +1,20 @@
+--Missing Performance counters
+MAIN:
+http://blogs.technet.com/b/pfelatam/archive/2011/08/08/sql-performance-counters-are-missing.aspx
+
+http://blog.sqlauthority.com/2014/11/07/sql-server-performance-counter-missing-how-to-get-them-back/
+
+http://blogs.msdn.com/b/sqlserverfaq/archive/2009/03/18/what-should-we-do-when-the-sql-server-performance-counters-are-missing.aspx
+
+
+cd C:\Program Files\Microsoft SQL Server\MSSQL12.SQLU9\MSSQL\Binn
+C:
+C:\Program Files\Microsoft SQL Server\MSSQL12.SQLU9\MSSQL\Binn>unlodctr MSSQL$SQLU9
+C:\Program Files\Microsoft SQL Server\MSSQL12.SQLU9\MSSQL\Binn>lodctr perf-MSSQL$SQLU9sqlctr.ini
+net stop "Remote Registry"
+net start "Remote Registry"
+net stop "Performance Logs & Alerts"
+net start "Performance Logs & Alerts"
+
+
+

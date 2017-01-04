@@ -1,0 +1,16 @@
+DBCC SQLPERF(LOGSPACE)
+		    ________> para qnto o arquivo vai, em mB
+		    |			
+DBCC shrinkfile (2,500)
+		 |
+		 |
+		Parametro file ID (2= arq de log, 1= arq de dados[geralmente])
+
+sp_t4b_getspace
+
+macchips_data	1	F:\MSSQL2005\MSSQL.2\MSSQL\DATA\MACCHIPS_1510.mdf
+macchips_log	2	F:\MSSQL2005\MSSQL.2\MSSQL\DATA\MACCHIPS_1510_log.LDF
+
+
+DBCC SQLPERF (LOGSPACE)
+--para ver a area de log q esta sendo utilizada!

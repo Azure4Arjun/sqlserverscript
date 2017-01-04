@@ -1,0 +1,1 @@
+Get-ChildItem "R:\backup\CEL-SQL01\celtrak_data\LOG\"  -force -recurse | where-object {$_.LastWriteTime -le (Get-Date).Addhours(-1) -and !$_.PsIsContainer} | remove-item -force

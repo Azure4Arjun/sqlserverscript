@@ -1,0 +1,10 @@
+sp_MSforeachdb 'select ''[?]'' as dbname select name, crdate from [?]..sysobjects where name = ''TMODA'''
+
+
+select @@servername
+go
+sp_MSforeachdb '
+use [?]
+IF OBJECT_ID (''dbo.TMODA'') IS NOT NULL 
+select ''[?]'' as Banco_de_Dados, name as Nome_da_View, crdate as Data_Criacao from [?]..sysobjects where name = ''TMODA'''
+

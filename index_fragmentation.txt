@@ -1,0 +1,24 @@
+-- 15-30% reorg
+-- >> 30% rebuild
+
+SELECT DB_NAME(SDDIPS.[database_id]) AS [database_name],  
+        OBJECT_NAME(SDDIPS.[object_id], DB_ID()) AS [object_name],  
+        SSI.[name] AS [index_name], SDDIPS.partition_number,  
+        SDDIPS.index_type_desc, SDDIPS.alloc_unit_type_desc,  
+        SDDIPS.[avg_fragmentation_in_percent], SDDIPS.[page_count]  
+FROM sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, 'detailed') SDDIPS 
+        INNER JOIN sys.sysindexes SSI  
+                ON SDDIPS.OBJECT_ID = SSI.id  
+                        AND SDDIPS.index_id = SSI.indid  
+WHERE SDDIPS.page_count > 30  
+        AND avg_fragmentation_in_percent > 15  
+        AND index_type_desc <> 'HEAP'  
+ORDER BY OBJECT_NAME(SDDIPS.[object_id], DB_ID()), index_id
+
+select db_name()
+-- Find the average fragmentation percentage of all indexes
+-- in the HumanResources.Employee table. 
+SELECT a.index_id, name, avg_fragmentation_in_percent
+FROM sys.dm_db_index_physical_stats (DB_ID(N'Cimentos_NPS_Votorantim_140265040101'), OBJECT_ID(N'tblcliente'), NULL, NULL, NULL) AS a
+    JOIN sys.indexes AS b ON a.object_id = b.object_id AND a.index_id = b.index_id; 
+GO

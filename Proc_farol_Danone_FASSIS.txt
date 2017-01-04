@@ -1,0 +1,150 @@
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Create proc t4bsp_farol_backup    
+(    
+@data_ref datetime = null,    
+@write bit = 1    
+)    
+as    
+/*----------------------------------------------------------    
+Tech4B Monitoring Tools for Microsoft SQL Server (R)    
+    
+Direito de c=pia (C) 2003-2005 Tech4B Technology for Business. Todos direitos reservados.    
+    
+Aviso: Este software T protegido pela Lei 9.609/98, de 20 de Fevereiro de 1998 (Lei do Software) combinado com a Lei do Direito Autoral e por tratados internacionais relativos a propriedade intelectual. A reprodutpo, distribuitpo ou utilizatpo npo autoriz
+
+
+
+
+ 
+ada deste programa, ou de qualquer parte dele, resultarß na impositpo de rigorosas penas civis e criminais, e serß objeto de atpo judicial promovida na mßxima extenspo possfvel, nos termos da lei.    
+    
+Copyright (C) 2003-2005 Tech4B Technology for Business 2002-2005. All rights reserved.    
+    
+Warning: This SOFTWARE is protected by copyright law and international treaties. Unauthorized reproduction or distribution of this program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum exte
+
+
+
+
+  
+  
+nt possible under the law.    
+any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.    
+    
+t4bsp_farol_backup    
+Verifica se hß algum backup (Dados para todos e Log para bancos com RM=full) com data anterior a @dat_ref. Se houver, retorna data    
+de inicio e fim do ultimo backup    
+-----------------------------------------------------------*/    
+    
+set nocount on    
+    
+if @data_ref is null    
+ select  @data_ref = convert(char(8), getdate(), 112)    
+ 
+DECLARE @start DATETIME, 
+        @end DATETIME, 
+		@datediff INT,
+		@hora VARCHAR(2),
+		@minuto VARCHAR(2),
+		@segundo VARCHAR(2)
+
+
+declare @tabaux table     
+(server_name varchar(128) null,     
+database_name varchar(128) null,    
+type char(1) null,    
+backup_start_date datetime null,    
+backup_finish_date datetime null)    
+    
+insert @tabaux    
+select  @@servername  
+, db.name  
+, 'D'  
+, isnull(max(backup_start_date), '19000101')  
+, isnull(max(backup_finish_date), '19000101')    
+from  msdb..backupset bkp  
+right join master..sysdatabases db    
+on bkp.database_name = db.name  
+and db.name not in ('tempdb','pubs','Northwind')    
+where  bkp.server_name = @@servername and    
+ bkp.type = 'D'  
+group by db.name    
+  
+insert @tabaux    
+select  @@servername  
+, db.name  
+, 'L'  
+, max(backup_start_date)  
+, max(backup_finish_date)    
+from  msdb..backupset bkp  
+right join master..sysdatabases db    
+on  bkp.database_name = db.name  
+and  db.status = db.status & 16    
+where  bkp.server_name = @@servername and    
+ bkp.type = 'L' and    
+ db.name not in ('tempdb','pubs','Northwind')  
+group by db.name  
+    
+    
+delete @tabaux    
+where type = 'D' and     
+ backup_start_date between @data_ref and dateadd(dd, -1, @data_ref) and    
+ backup_finish_date between @data_ref and dateadd(dd, -1, @data_ref)    
+    
+select  @data_ref = dateadd(hh, -1, getdate())    
+    
+delete @tabaux    
+where type = 'L' and     
+ backup_start_date >= @data_ref and    
+ backup_finish_date >= @data_ref    
+    
+if @write = 1    
+ insert  t4btb_hist_farol_backup    
+ select getdate(), *    
+ from  @tabaux    
+  
+---------------------
+
+SELECT @start = MIN(backup_start_date)
+FROM @tabaux 
+ 
+SELECT @end = MAX(backup_finish_date) 
+FROM @tabaux
+
+SELECT @datediff = DATEDIFF(ss,@start,@end)
+
+SELECT @hora = CASE 
+			WHEN DATEPART(hh,DATEADD(ss,@datediff,'Jan  1 2000  0:00AM')) < 10
+			THEN '0' + CONVERT(VARCHAR(2),DATEPART(hh,DATEADD(ss,@datediff,'Jan  1 2000  0:00AM')))
+			ELSE	
+			CONVERT(VARCHAR(2),DATEPART(hh,DATEADD(ss,@datediff,'Jan  1 2000  0:00AM')))
+			END
+SELECT @minuto = CASE 
+			WHEN DATEPART(mi,DATEADD(ss,@datediff,'Jan  1 2000  0:00AM')) < 10
+			THEN '0' + CONVERT(VARCHAR(2),DATEPART(mi,DATEADD(ss,@datediff,'Jan  1 2000  0:00AM')))
+			ELSE	
+			CONVERT(VARCHAR(2),DATEPART(mi,DATEADD(ss,@datediff,'Jan  1 2000  0:00AM')))
+			END
+SELECT @segundo = CASE 
+			WHEN DATEPART(ss,DATEADD(ss,@datediff,'Jan  1 2000  0:00AM')) < 10
+			THEN '0' + CONVERT(VARCHAR(2),DATEPART(ss,DATEADD(ss,@datediff,'Jan  1 2000  0:00AM')))
+			ELSE	
+			CONVERT(VARCHAR(2),DATEPART(ss,DATEADD(ss,@datediff,'Jan  1 2000  0:00AM')))
+			END
+----------------- 
+
+
+
+select  convert(varchar(20),server_name) "server",  
+ convert(varchar(20),database_name) "database",  
+ convert(varchar(1),type) "type",  
+ convert(varchar(19),backup_start_date,120) "backup_start_date",  
+ convert(varchar(19),backup_finish_date,120) "backup_finish_date"  
+from @tabaux    
+
+
+
+
+SELECT @start 'StartTime', @end 'EndTime', @hora + ':' + @minuto + ':' + @segundo 'Total Time (Min)' 
+
